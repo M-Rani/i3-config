@@ -1,0 +1,22 @@
+#!/usr/bin/env bash
+
+APPLETS=(
+	"nm-applet"
+	"volumeicon"
+	"firewall-applet"
+)
+
+# Quick launch applications from Applets array
+for TRAY_APP in "${APPLETS[@]}"; do
+	pkill $TRAY_APP
+	$TRAY_APP &
+	disown
+	sleep 1
+done
+
+# Relaunch applications that don't successfully launch quietly
+for TRAY_APP in "${APPLETS[@]}"; do
+	pgrep $TRAY_APP >/dev/null || $TRAY_APP >/dev/null &
+	disown
+	sleep 5
+done

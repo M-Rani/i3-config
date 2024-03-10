@@ -1,0 +1,20 @@
+#!/usr/bin/env bash
+
+pkill xidlehook
+xset dpms 0 0 3600 &
+disown
+xset s 3600 3600 &
+disown
+
+xidlehook \
+	--not-when-fullscreen \
+	--not-when-audio \
+	--timer 3600 \
+	'xrandr --output eDP-1 --brightness 0.1' \
+	'xrandr --output eDP-1 --brightness $(cat ~/.cache/screen_brightness)' \
+	--timer 3600 \
+	'xrandr --output eDP-1 --brightness $(cat ~/.cache/screen_brightness); betterlockscreen -l dim --display 1 --off 120' \
+	'' \
+	--timer 7200 \
+	'systemctl suspend' \
+	''

@@ -1,0 +1,86 @@
+#!/usr/bin/env bash
+
+RECORDING_DIRS=~/videos/rc
+SCREENCAP_DIRS=~/pictures/sc
+
+IMG_REC=~/.config/i3/ico/img_rec.jpg
+IMG_CAP=~/.config/i3/ico/img_cap.jpg
+
+TIMESTAMP=$(date +"%Y-%m-%d_%H:%M:%S")
+REPLACE_ID=192519
+
+screencap-region-record() {
+	if ! [ -d "$RECORDING_DIRS" ]; then
+		mkdir -p "$RECORDING_DIRS"
+	fi
+
+	DATE=$(date +%F_%H:%M-%S)
+	FILE="${DATE}"
+
+	hacksaw -c FFFFFF | {
+		IFS=+x read -r w h x y
+
+		w=$((w + w % 2))
+		h=$((h + 2 % 2))
+		FILE+="_${w}x${h}"
+
+		timeout 6 ffmpeg \
+			-v 16 \
+			-r 30 \
+			-f x11grab \
+			-s "${w}x${h}" \
+			-i ":0.0+$x,$y" \
+			-preset superfast \
+			-c:v h264 \
+			-pix_fmt yuv420p \
+			-crf 20 \
+			"$RECORDING_DIRS/$FILE.mp4"
+	}
+
+	dunstify \
+		-a "i3-screencap" \
+		-i $IMG_REC \
+		-r $REPLACE_ID \
+		"Region recorded! [$(date +'%H:%M:%S')]" \
+		"<i>Saved...</i> <b>$RECORDING_DIRS</b>"
+}
+
+screencap-primary() {
+	if ! [ -d "$SCREENCAP_DIRS" ]; then
+		mkdir -p $SCREENCAP_DIRS
+	fi
+
+	PRIMARY=$(xrandr | rg primary | cut -d ' ' -f1)
+	FILE="${TIMESTAMP}_${PRIMARY}.png"
+
+	shotgun -s -f png $SCREENCAP_DIRS/$FILE &&
+		dunstify \
+			-a "i3-screencap" \
+			-i $IMG_CAP \
+			-r $REPLACE_ID \
+			"Screencap taken! [$(date +'%H:%M:%S')]" \
+			"<i>Saved...</i> <b>$SCREENCAP_DIRS</b>"
+}
+
+screencap-region() {
+	if ! [ -d "$SCREENCAP_DIRS" ]; then
+		mkdir -p $SCREENCAP_DIRS
+	fi
+
+	SELECTION=$(hacksaw -c FFFFFF) # add hacksaw arguments inside as you wish
+	FILE="${TIMESTAMP}_${SELECTION}.png"
+
+	shotgun -g "$SELECTION" -f png $SCREENCAP_DIRS/$FILE &&
+		dunstify \
+			-a "i3-screencap" \
+			-i $IMG_CAP \
+			-r $REPLACE_ID \
+			"Screencap saved! [$(date +'%H:%M:%S')]" \
+			"<i>Saved...</i> <b>$SCREENCAP_DIRS</b>"
+}
+
+case $1 in
+"1") screencap-primary ;;
+"2") screencap-region ;;
+"3") screencap-region-record ;;
+esac

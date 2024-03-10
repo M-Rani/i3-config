@@ -1,0 +1,48 @@
+#!/usr/bin/env bash
+
+pkill dunst
+pkill flashfocus
+pkill picom
+
+~/.config/polybar/launch.sh
+
+# Set Compositor
+picom --vsync --experimental-backends &
+disown
+sleep $((1 / 5))
+
+# Either read screen brightness from cache, or make default
+if [ -f ~/.cache/screen_brightness ]; then
+	SCREEN_BRIGHTNESS="$(cat ~/.cache/screen_brightness)"
+else
+	SCREEN_BRIGHTNESS="0.75"
+	printf "$SCREEN_BRIGHTNESS" >~/.cach/screen_brightness
+fi
+
+xrandr \
+	--output DP-2 \
+	--primary \
+	--mode 1920x1080 \
+	--pos 0x0 \
+	--brightness $SCREEN_BRIGHTNESS \
+	--refresh 240.30 \
+	--rotate normal
+sleep $((1 / 5))
+
+# Set Wallpaper
+~/.fehbg
+
+# Move mouse to center screen on login
+xdotool mousemove $((1920 / 2)) $((1080 / 2))
+sleep $((1 / 5))
+
+# Conky CPU Monitor
+pkill conky
+conky -c ~/.config/conky/conkyrc >/dev/null &
+disown
+
+flashfocus &
+disown
+
+dunst &
+disown

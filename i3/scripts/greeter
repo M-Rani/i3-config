@@ -1,0 +1,7 @@
+#!/usr/bin/env bash
+dunstify \
+	-u normal \
+	-a "i3-startup-notification" \
+	-i "~/.config/i3/scripts/img_home.jpg" \
+	-r 192519 \
+	" Hello ${USER^^}!" " <i>$(date)</i>\n\n\"$(curl -L fir3.link)\""

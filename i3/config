@@ -1,0 +1,40 @@
+# _)___ /    ___|              _|_)                       |  _)
+#  |  _ \   |      _ \  __ \  |   |  _` | |   |  __| _` | __| |  _ \  __ \
+#  |   ) |  |     (   | |   | __| | (   | |   | |   (   | |   | (   | |   |
+# _|____/  \____|\___/ _|  _|_|  _|\__, |\__,_|_|  \__,_|\__|_|\___/ _|  _|
+#                                  |___/
+
+# include all configuration conf files
+include ~/.config/i3/config.d/*.conf
+
+# Setup working environment
+set $ws1 "1"
+set $ws2 "2"
+set $ws3 "3"
+set $ws4 "4"
+set $ws5 "5"
+set $ws6 "6"
+set $ws7 "7"
+set $ws8 "8"
+set $ws9 "9"
+set $ws10 "0"
+workspace 1 output eDP-1
+workspace 2 output eDP-1
+workspace 3 output eDP-1
+workspace 4 output eDP-1
+workspace 5 output eDP-1
+workspace 7 output eDP-1
+workspace 6 output eDP-1
+workspace 8 output eDP-1
+workspace 9 output eDP-1
+workspace 0 output eDP-1
+
+# Startup Scripts
+exec_always --no-startup-id ~/.config/i3/scripts/display-setter
+exec_always --no-startup-id ~/.config/i3/scripts/applets
+exec_always --no-startup-id ~/.config/i3/scripts/autolock
+exec_always --no-startup-id ~/.config/i3/scripts/autotiling -l 2
+
+# Launch apps once on startup
+exec --no-startup-id ~/.config/i3/scripts/greeter
+exec --no-startup-id mousetrap -t 1

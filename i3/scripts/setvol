@@ -1,0 +1,55 @@
+#!/usr/bin/env bash
+
+# unused, switches to using volumeicon
+
+STEP=2
+MAX=100
+DIV=3
+
+# Get current volume
+CurrVol="$(pactl get-sink-volume @DEFAULT_SINK@ | rg ...% -o | tail -n1 | tr -d %)"
+
+# Location of Icon Files
+ICON_0=~/.config/i3/ico/volume_icon_0.png
+ICON_1=~/.config/i3/ico/volume_icon_1.png
+ICON_2=~/.config/i3/ico/volume_icon_2.png
+ICON_3=~/.config/i3/ico/volume_icon_3.png
+
+# Mute Volume
+[[ "${1^^}" == "MUTE" ]] && {
+  pactl set-sink-mute @DEFAULT_SINK@ toggle
+}
+
+# Check if volume is muted
+IS_MUTE="$(pactl list sinks | rg "Mute: yes" | choose -f : 1)"
+[[ $IS_MUTE == " yes" ]] && {
+  dunstify -u normal -r 2593 -i $ICON_0 " MUTE"
+  exit 0
+}
+
+# Calculate Volume
+MathVol="$CurrVol"
+[[ "${1^^}" == "UP" || "$1" == "+" ]] && MathVol=$(( CurrVol + STEP ))
+[[ "${1^^}" == "DOWN" || "$1" == "-" ]] && MathVol=$(( CurrVol - STEP ))
+[[ "$1"  =~ ^([0-9]+)$ ]] && MathVol="$1"
+
+# Check Value
+[[ "$MathVol:0:1" == "-" ]] && MathVol=0   # Can't go negative
+[[ "$MathVol" -gt $MAX ]] && MathVol=100   # Can't go over MAX
+[[ "$MathVol" -lt 0 ]] && MathVol=0        # Can't be less than 0
+CurrVol="$MathVol"
+
+# Change Volume - then make notification
+pactl set-sink-volume @DEFAULT_SINK@ $CurrVol%
+for ((i=0;i<$((CurrVol/DIV));++i)); do
+  BLOCK+='▓'
+done
+BLOCK_N=${#BLOCK}
+for ((i=0;i<$((MAX/DIV - BLOCK_N));i++)); do
+  EMPTY+='░'
+done
+ICON=$ICON_1
+[[ "$CurrVol" -gt  0 ]] && ICON=$ICON_2
+[[ "$CurrVol" -gt 50 ]] && ICON=$ICON_3
+[[ ${#CurrVol} -lt 3 ]] && CurrVol=" $CurrVol"
+dunstify -t 1250 -u normal -r 2593 -i $ICON "  $BLOCK█$EMPTY   $CurrVol%"

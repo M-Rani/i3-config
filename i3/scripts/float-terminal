@@ -1,0 +1,19 @@
+#!/usr/bin/env bash
+
+SCREEN_DIM="$(xrandr | grep '\*' | cut -d ' ' -f4)"
+SCREEN_X="$(choose -f 'x' 0 <<<$SCREEN_DIM)"
+SCREEN_Y="$(choose -f 'x' 1 <<<$SCREEN_DIM)"
+
+# Use xdotool to determine if polybar is showing on screen, and its height
+if POLY_PID=$(xdotool search --onlyvisible --class polybar); then
+	POLY_HEIGHT="$(xdotool getwindowgeometry $POLY_PID | grep Geometry | cut -dx -f2)"
+	POS="0,$((POLY_HEIGHT + 1))"
+else
+	POS="0,0"
+fi
+
+TERM_X="$((SCREEN_X - SCREEN_X / 2 - 100))"
+TERM_Y="$((SCREEN_Y - SCREEN_Y / 2 - 100))"
+
+i3-scratchpad -d${TERM_X}x${TERM_Y} -p${POS} -mt -atl -t \
+	"kitty --class=i3_float_term -1 --instance-group=i3_term_group"
